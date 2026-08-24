@@ -1,0 +1,24 @@
+# Jito Bridge — Bridge Assets to Solana for Jito Reference
+
+> Move assets from Ethereum to Solana so you can stake with Jito (jitoSOL liquid staking) and use its MEV infrastructure, non-custodially.
+
+## Key Facts
+- Action: bridge assets from another chain (usually Ethereum) to Solana, then use Jito on Solana
+- Jito: Solana liquid staking (issues jitoSOL) + MEV infrastructure — it is a Solana protocol, so you bridge to Solana first
+- jitoSOL: liquid staking token representing staked SOL plus staking/MEV rewards, usable across Solana DeFi
+- Gas: Solana network fees are paid in SOL — keep a small SOL balance to transact and stake
+- Custody: non-custodial — your wallet signs each step
+- Costs: source-chain gas + bridge fee + Solana fees (SOL)
+
+## Internal Sections & App Navigation
+- [What is Jito Bridge?](#what)
+- [How bridging to Solana works](#how)
+- [Solana network & gas](#solana)
+- [Using Jito on Solana](#jito)
+- [Fees, gas & time](#fees)
+- [Is bridging safe?](#safety)
+- [FAQ](#faq)
+- [Open Jito Bridge App](dashboard/index.html)
+
+## Disclaimer
+Independent page. Not affiliated with Jito, Solana or any bridge. Not financial advice.

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Jito Bridge — Bridge Assets to Solana for Jito</title>
+<meta content="Jito Bridge: move assets from Ethereum to Solana to stake with Jito (jitoSOL liquid staking) and use its MEV infrastructure. How bridging works, gas in SOL, fees and safety. Independent, not affiliated with Jito." name="description"/>
+<meta content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" name="robots"/>
+<meta content="#0a0e14" name="theme-color"/>
+<link href="https://jito-bridge.github.io/" rel="canonical"/>
+<link href="jto.png" rel="icon" type="image/png"/>
+<link href="jto.png" rel="apple-touch-icon"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link href="jto.png" rel="image_src"/>
+<link crossorigin="" href="https://api.coingecko.com" rel="preconnect"/>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0a0e14;
+  --surface: #10161f; --panel: #131b26; --raised: #1a232f; --raised-2: #212c3a;
+  --line: rgba(255,255,255,.09); --line-2: rgba(255,255,255,.17);
+  --ink: #f3f7fc; --text: #c4cdd9; --muted: #8b97a6; --faint: #6b7686;
+  --accent: #22d3ee; --accent-2: #06b6d4; --accent-3: #67e8f9;
+  --accent-soft: rgba(34,211,238,.12); --accent-line: rgba(34,211,238,.38); --accent-glow: rgba(34,211,238,.45);
+  --warn: #f59e0b; --warn-soft: rgba(245,158,11,.10); --warn-line: rgba(245,158,11,.45);
+  --cta: #22d3ee; --cta-2: #06b6d4; --cta-ink: #04140a;
+  --r-sm: 10px; --r-md: 14px; --r-lg: 16px; --r-xl: 22px;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, "Roboto Mono", Menlo, Consolas, monospace;
+  --font: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ease: cubic-bezier(0.22, 0.7, 0.24, 1);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; min-width: 320px; overflow-x: hidden; color: var(--text); background: var(--bg); background-image: radial-gradient(1100px 620px at 80% -8%, rgba(34,211,238,.10), transparent 60%), radial-gradient(900px 500px at 8% 4%, rgba(6,182,212,.06), transparent 55%); background-attachment: fixed; font-family: var(--font); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 3px; border-radius: 10px; }
+.skip { position: absolute; left: -999px; }
+.skip:focus { left: 12px; top: 12px; z-index: 99; padding: 10px 16px; border-radius: 10px; background: var(--accent); color: var(--cta-ink); font-weight: 800; }
+.topbar { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 12px clamp(16px, 4vw, 30px); background: rgba(10,14,20,.72); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%); }
+.topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.topbar-logo { width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 11px; background: var(--raised); box-shadow: inset 0 0 0 1px var(--line-2); }
+.topbar-logo img { width: 24px; height: 24px; border-radius: 7px; }
+h1.wordmark { margin: 0; font-size: 18px; font-weight: 850; letter-spacing: -0.03em; color: var(--ink); line-height: 1; white-space: nowrap; }
+.wordmark .tld { color: var(--accent-3); }
+.topbar-right { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; }
+.ticker { display: flex; align-items: center; flex-wrap: wrap; gap: 3px 16px; min-width: 0; }
+.tick { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--faint); font-size: 11.5px; font-weight: 600; }
+.tick b { color: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 600; }
+.tick .ext { color: var(--faint); font-size: 10px; }
+.tick:hover { color: var(--muted); } .tick:hover b, .tick:hover .ext { color: var(--accent-3); }
+.nav-cta { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 18px; border-radius: 12px; background: var(--accent); color: var(--cta-ink); font-size: 13.5px; font-weight: 800; box-shadow: 0 6px 18px -6px var(--accent-glow); transition: transform .16s var(--ease), box-shadow .16s var(--ease), filter .16s var(--ease); }
+.nav-cta:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 12px 28px -8px var(--accent-glow); }
+.hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(28px, 4vw, 56px); align-items: center; width: min(1160px, 100%); margin: 0 auto; padding: clamp(34px, 7vh, 84px) clamp(16px, 4vw, 30px) clamp(30px, 5vh, 60px); }
+.hero-l { min-width: 0; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border: 1px solid var(--accent-line); border-radius: 999px; background: var(--accent-soft); color: var(--accent-3); font-size: 12px; font-weight: 750; }
+.eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 0 4px var(--accent-soft); animation: pulse 2.4s var(--ease) infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+@media (prefers-reduced-motion: reduce){ .eyebrow .dot{animation:none} }
+.hero-h { margin: 18px 0 0; font-size: clamp(2.15rem, 5.3vw, 3.7rem); line-height: 1.04; font-weight: 850; letter-spacing: -0.035em; color: var(--ink); }
+.hero-h .grad { background: linear-gradient(100deg, var(--accent-3), #a5f3fc 55%, var(--accent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.hero-lead { margin: 18px 0 0; max-width: 50ch; font-size: 16.5px; line-height: 1.6; color: var(--text); }
+.hero-lead strong { color: var(--ink); font-weight: 700; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 52px; border-radius: 14px; font-weight: 800; font-size: 15.5px; cursor: pointer; border: 0; transition: transform .16s var(--ease), box-shadow .16s var(--ease), filter .16s var(--ease), border-color .16s var(--ease); }
+.btn-primary { padding: 0 26px; color: var(--cta-ink); background: linear-gradient(135deg, var(--accent-3), var(--accent) 55%, var(--accent-2)); box-shadow: 0 12px 30px -8px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.28); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 20px 46px -10px var(--accent-glow); filter: brightness(1.04); }
+.btn-primary .go { transition: transform .18s var(--ease); }
+.btn-primary:hover .go { transform: translate(2px,-2px); }
+.btn-ghost { padding: 0 22px; color: var(--ink); background: rgba(255,255,255,.03); border: 1px solid var(--line-2); }
+.btn-ghost:hover { border-color: var(--accent-line); color: var(--accent-3); }
+.trust { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 26px 0 0; }
+.trust-badge { display: flex; align-items: center; gap: 10px; padding: 12px 13px; border: 1px solid var(--line); border-radius: var(--r-md); background: rgba(255,255,255,.02); }
+.trust-badge .tb-ico { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 9px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.trust-badge .tb-ico svg { width: 16px; height: 16px; color: var(--accent-3); }
+.trust-badge b { display: block; color: var(--ink); font-size: 13px; font-weight: 750; line-height: 1.2; }
+.trust-badge span { display: block; color: var(--faint); font-size: 10.5px; font-weight: 600; margin-top: 2px; }
+@media (max-width: 720px){ .trust { grid-template-columns: 1fr 1fr; } }
+.swap-wrap { position: relative; }
+.swap-wrap::before { content:""; position:absolute; inset:-1px; border-radius: 26px; background: linear-gradient(160deg, var(--accent-line), transparent 45%); opacity:.7; z-index:0; }
+.swap-card { position: relative; z-index: 1; border: 1px solid var(--line-2); border-radius: 24px; background: linear-gradient(180deg, var(--panel), var(--surface)); padding: 18px; box-shadow: 0 40px 90px -34px rgba(0,0,0,.75); }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 0 2px; }
+.card-title { margin: 0; font-size: 15px; font-weight: 800; color: var(--ink); }
+.preview-tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border: 1px solid var(--accent-line); border-radius: 999px; background: var(--accent-soft); color: var(--accent-3); font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.preview-tag > span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-3); box-shadow: 0 0 0 3px var(--accent-soft); }
+.leg { border: 1px solid var(--line); border-radius: 16px; background: var(--bg); padding: 14px 15px; transition: border-color .16s var(--ease); }
+.leg:hover, .leg:focus-within { border-color: var(--line-2); }
+.leg-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.leg-cap { font-size: 12px; font-weight: 650; color: var(--muted); }
+.leg-bal { font-size: 11.5px; color: var(--faint); font-weight: 600; }
+.leg-body { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.amount { font-family: var(--mono); font-size: 1.9rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.leg-body .amount.dim { color: var(--faint); }
+.asset { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; min-height: 44px; padding: 6px 12px 6px 6px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--raised); color: var(--ink); font-size: 15px; font-weight: 800; cursor: pointer; transition: border-color .16s var(--ease), background-color .16s var(--ease); }
+.asset:hover { border-color: var(--accent-line); background: var(--raised-2); }
+.asset .tok { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #fff; box-shadow: 0 0 0 1px var(--line-2); }
+.asset .tok img { width: 28px; height: 28px; }
+.asset .chev-sm { width: 15px; height: 15px; color: var(--muted); }
+.swap-arrow { position: relative; z-index: 2; display: grid; place-items: center; width: 44px; height: 44px; margin: -14px auto; border: 4px solid var(--panel); border-radius: 14px; background: var(--raised); color: var(--accent-3); cursor: pointer; box-shadow: 0 0 0 1px var(--line-2); transition: transform 240ms var(--ease), background-color .16s var(--ease), color .16s var(--ease); }
+.swap-arrow svg { width: 18px; height: 18px; }
+.swap-arrow:hover { transform: rotate(180deg); background: var(--accent); color: var(--cta-ink); }
+.route-panel { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.02); }
+.route-info b { display: block; color: var(--ink); font-size: 13.5px; font-weight: 750; }
+.route-info span { display: block; margin-top: 2px; color: var(--faint); font-size: 11.5px; }
+.route-tok { display: inline-flex; align-items: center; gap: 7px; color: var(--text); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.route-tok .tok { width: 22px; height: 22px; border-radius: 50%; overflow: hidden; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 1px var(--line-2); }
+.route-tok .tok img { width: 22px; height: 22px; }
+.route-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 4px 2px; border-top: 1px solid var(--line); margin-top: 10px; }
+.route-row span { font-size: 10.5px; font-weight: 750; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); }
+.route-row b { color: var(--text); font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.swap-cta { display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 16px; min-height: 54px; border-radius: 15px; color: var(--cta-ink); background: linear-gradient(135deg, var(--accent-3), var(--accent) 55%, var(--accent-2)); font-size: 16.5px; font-weight: 850; box-shadow: 0 16px 34px -12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,.28); transition: filter 150ms var(--ease), transform 150ms var(--ease), box-shadow .16s var(--ease); }
+.swap-cta:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 22px 50px -12px var(--accent-glow); }
+.swap-cta .cta-go { transition: transform 0.18s var(--ease); }
+.swap-cta:hover .cta-go { transform: translateX(3px); }
+.swap-foot { text-align: center; margin: 12px 2px 0; font-size: 11px; color: var(--faint); }
+@media (max-width: 900px){ .hero { grid-template-columns: 1fr; gap: 30px; } .swap-wrap { max-width: 460px; margin: 0 auto; width: 100%; } }
+.content { width: min(1160px, 100%); margin: 0 auto; padding: clamp(30px, 5vh, 60px) clamp(16px, 4vw, 30px) 80px; }
+.section-intro { max-width: 760px; margin: 0 auto clamp(22px, 4vh, 40px); }
+.section-intro p { margin: 0 0 14px; font-size: 16px; line-height: 1.7; color: var(--text); }
+.section-intro p strong { color: var(--ink); font-weight: 700; }
+.docs { display: grid; grid-template-columns: 236px minmax(0,1fr); gap: clamp(26px, 4vw, 56px); align-items: start; }
+.toc { position: sticky; top: 76px; align-self: start; max-height: calc(100dvh - 100px); overflow: auto; }
+.toc-h { margin: 0 0 10px; font-size: 10.5px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); padding-left: 13px; }
+.toc a { display: block; min-height: 34px; padding: 8px 13px; border-left: 2px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 650; line-height: 1.3; transition: color .15s var(--ease), border-color .15s var(--ease); }
+.toc a:hover { color: var(--ink); }
+.toc a.active { color: var(--accent-3); border-left-color: var(--accent); font-weight: 800; }
+.doc-main { min-width: 0; }
+.sec { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); margin: 0 0 14px; scroll-margin-top: 82px; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: box-shadow .24s var(--ease), border-color .24s var(--ease); }
+.sec:hover { border-color: var(--line-2); }
+.sec[open] { border-color: var(--accent-line); box-shadow: 0 20px 50px -24px rgba(34,211,238,.28); }
+.sec > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: clamp(16px,2.5vh,22px) clamp(16px,3vw,24px); border-radius: 18px; transition: background-color .16s var(--ease); }
+.sec > summary:hover { background: rgba(255,255,255,.03); }
+.sec > summary::-webkit-details-marker { display: none; }
+.sec > summary h2 { margin: 0; font-size: clamp(1.08rem,2.4vw,1.35rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+.chev { flex: 0 0 auto; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line-2); background: var(--raised); color: var(--accent-3); transition: transform .28s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease); }
+.chev svg { width: 18px; height: 18px; }
+.sec[open] > summary .chev { transform: rotate(180deg); background: var(--accent-soft); border-color: var(--accent-line); }
+.sec-body { padding: 0 clamp(16px,3vw,24px) clamp(18px,3vh,26px); max-width: 74ch; }
+.sec[open] .sec-body { animation: drop .22s var(--ease); }
+@keyframes drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce){ .sec[open] .sec-body { animation: none; } .chev { transition: none; } }
+.sec-body p { margin: 0 0 13px; color: var(--text); }
+.sec-body p:last-child { margin-bottom: 0; }
+.sec-body strong { color: var(--ink); font-weight: 700; }
+.sec-body ul { margin: 0 0 4px; padding-left: 20px; }
+.sec-body li { margin-bottom: 8px; color: var(--text); }
+.sec-body li::marker { color: var(--accent-3); }
+.sec-body a { color: var(--accent-3); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--accent-line); transition: color .15s var(--ease); }
+.sec-body a:hover { color: var(--accent); }
+.addr { font-family: var(--mono); font-size: 12.5px; color: var(--accent-3); word-break: break-all; }
+.notice { border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 14px; background: var(--warn-soft); margin: 0 0 12px; overflow: hidden; }
+.notice > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 14px 16px; }
+.notice > summary::-webkit-details-marker { display: none; }
+.notice .n-ico { width: 26px; height: 26px; flex: 0 0 auto; display: grid; place-items: center; color: var(--warn); }
+.notice .n-ico svg { width: 20px; height: 20px; }
+.notice .n-title { flex: 1 1 auto; color: var(--ink); font-weight: 750; font-size: 14.5px; }
+.notice .chev-w { flex: 0 0 auto; width: 30px; height: 30px; display: grid; place-items: center; color: var(--warn); transition: transform .26s var(--ease); }
+.notice .chev-w svg { width: 17px; height: 17px; }
+.notice[open] .chev-w { transform: rotate(180deg); }
+.notice .n-body { padding: 0 16px 16px 54px; color: var(--text); font-size: 13.5px; line-height: 1.66; }
+.notice .n-body strong { color: var(--ink); }
+@media (max-width: 560px){ .notice .n-body { padding-left: 16px; } }
+.qa { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); margin: 0 0 10px; overflow: hidden; transition: border-color .18s var(--ease); }
+.qa:hover { border-color: var(--line-2); }
+.qa[open] { border-color: var(--accent-line); }
+.qa > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 56px; padding: 15px 18px; color: var(--ink); font-weight: 700; font-size: 14.5px; transition: background-color .16s var(--ease); }
+.qa > summary:hover { background: rgba(255,255,255,.03); }
+.qa > summary::-webkit-details-marker { display: none; }
+.qa .chev-q { flex: 0 0 auto; width: 26px; height: 26px; display: grid; place-items: center; color: var(--accent-3); transition: transform .24s var(--ease); }
+.qa .chev-q svg { width: 17px; height: 17px; }
+.qa[open] .chev-q { transform: rotate(180deg); }
+.qa .a { padding: 0 18px 16px; color: var(--text); font-size: 13.5px; line-height: 1.66; }
+.qa .a a { color: var(--accent-3); text-decoration: underline; text-underline-offset: 3px; }
+.field-notes { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 16px; background: var(--panel); padding: clamp(20px,3vh,26px) clamp(18px,3vw,26px); margin: 16px 0 0; scroll-margin-top: 82px; }
+.field-notes h2 { margin: 0 0 12px; font-size: clamp(1.08rem,2.4vw,1.35rem); font-weight: 800; letter-spacing: -.02em; color: var(--ink); }
+.field-notes .fn-body { color: var(--text); font-size: 14px; line-height: 1.68; max-width: 74ch; }
+.field-notes .fn-body strong { color: var(--ink); font-weight: 700; }
+.field-notes .fn-body ul { margin: 8px 0; padding-left: 20px; }
+.field-notes .fn-body li { margin-bottom: 6px; }
+@media (max-width: 900px){
+  .docs { grid-template-columns: 1fr; gap: 0; }
+  .toc { position: sticky; top: 55px; z-index: 20; display: flex; gap: 8px; overflow-x: auto; max-height: none; background: rgba(10,14,20,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 10px 2px; margin: 0 0 14px; border-bottom: 1px solid var(--line); }
+  .toc-h { display: none; }
+  .toc a { flex: 0 0 auto; white-space: nowrap; border-left: 0; border: 1px solid var(--line); border-radius: 999px; padding: 9px 15px; font-size: 12.5px; min-height: 40px; display: flex; align-items: center; }
+  .toc a.active { color: var(--accent-3); border-color: var(--accent); background: var(--accent-soft); }
+}
+.site-foot { width: min(1160px, 100%); margin: 0 auto; padding: 26px clamp(16px,4vw,30px) 48px; border-top: 1px solid var(--line); color: var(--faint); font-size: 12.5px; line-height: 1.65; }
+.site-foot .wrap { max-width: 88ch; }
+.site-foot a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.site-foot a:hover { color: var(--accent-3); }
+html.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+html.js .reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce){ html.js .reveal { opacity: 1; transform: none; transition: none; } }
+@media (max-width: 560px){ .ticker { display: none; } .amount { font-size: 1.6rem; } .hero { padding-top: 26px; } }
+</style>
+<meta content="website" property="og:type"/><meta content="https://jito-bridge.github.io/" property="og:url"/>
+<meta content="Jito Bridge — Bridge Assets to Solana for Jito" property="og:title"/>
+<meta content="Move assets from Ethereum to Solana to stake with Jito (jitoSOL) and use its MEV infrastructure. Gas in SOL." property="og:description"/>
+<meta content="Jito Bridge" property="og:site_name"/><meta content="https://jito-bridge.github.io/jto.png" property="og:image"/>
+<meta content="summary_large_image" name="twitter:card"/><meta content="Jito Bridge — Bridge Assets to Solana for Jito" name="twitter:title"/>
+<meta content="Move assets from Ethereum to Solana to stake with Jito and use its MEV infrastructure." name="twitter:image"/>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://jito-bridge.github.io/#website","url":"https://jito-bridge.github.io/","name":"Jito Bridge","inLanguage":"en"},{"@type":"WebPage","@id":"https://jito-bridge.github.io/#webpage","url":"https://jito-bridge.github.io/","name":"Jito Bridge — Bridge Assets to Solana for Jito","description":"Move assets from Ethereum to Solana to stake with Jito (jitoSOL liquid staking) and use its MEV infrastructure.","isPartOf":{"@id":"https://jito-bridge.github.io/#website"},"inLanguage":"en","dateModified":"2026-08-24"},{"@type":"FAQPage","@id":"https://jito-bridge.github.io/#faq","mainEntity":[{"@type":"Question","name":"What is Jito Bridge?","acceptedAnswer":{"@type":"Answer","text":"Jito Bridge here means bridging assets from another chain, usually Ethereum, to Solana so you can use Jito — Solana's liquid staking (jitoSOL) and MEV infrastructure. Bridging changes the chain your assets sit on; Jito itself is a Solana protocol, so you bridge to Solana first, then stake or use it."}},{"@type":"Question","name":"How do I bridge to Solana to use Jito?","acceptedAnswer":{"@type":"Answer","text":"Connect a wallet, choose Ethereum as the source and Solana as the destination, pick an asset and amount, approve if required, and sign. The bridge locks or burns the asset on the source chain and releases a Solana representation, which you can then swap to SOL and stake with Jito for jitoSOL."}},{"@type":"Question","name":"What is jitoSOL?","acceptedAnswer":{"@type":"Answer","text":"jitoSOL is Jito's liquid staking token on Solana. When you stake SOL through Jito you receive jitoSOL, which represents your staked position plus staking and MEV rewards and can be used across Solana DeFi while it keeps earning."}},{"@type":"Question","name":"What does bridging to Solana cost?","acceptedAnswer":{"@type":"Answer","text":"Costs include source-chain gas, any bridge fee, and Solana network fees paid in SOL. Solana fees are low, but you need a small SOL balance to transact, stake and pay for actions on Solana after bridging."}},{"@type":"Question","name":"Is bridging to Solana for Jito safe?","acceptedAnswer":{"@type":"Answer","text":"Bridges add smart-contract and relayer risk on top of normal token risk, and transfers can be delayed under congestion. Liquid staking and DeFi carry their own smart-contract and market risks. Use well-known bridges, verify the destination address and token, and test with a small amount first. This is not financial advice."}},{"@type":"Question","name":"Do I need SOL to stake with Jito?","acceptedAnswer":{"@type":"Answer","text":"Yes. Solana transactions and staking are paid in SOL, so after bridging you need a small SOL balance to move assets, stake and receive jitoSOL. Keep a little SOL aside for network fees."}}]}]}
+</script>
+<link href="dashboard/index.html" rel="prefetch"/></head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<div class="topbar-left">
+<span class="topbar-logo"><img alt="Jito Bridge" height="24" src="jto.png" width="24"/></span>
+<h1 class="wordmark">Jito<span class="tld"> Bridge</span></h1>
+</div>
+<div class="topbar-right">
+<div aria-label="Live metrics" class="ticker">
+<a aria-label="JTO price" class="tick" href="https://www.coingecko.com/en/coins/jito-governance-token" rel="noopener noreferrer" target="_blank"><span>JTO</span> <b id="sig-jto">…</b> <span aria-hidden="true" class="ext">↗</span></a>
+<a aria-label="SOL price" class="tick" href="https://www.coingecko.com/en/coins/solana" rel="noopener noreferrer" target="_blank"><span>SOL</span> <b id="sig-sol">…</b> <span aria-hidden="true" class="ext">↗</span></a>
+</div>
+<a class="nav-cta" href="dashboard/">Open App <span aria-hidden="true">↗</span></a>
+</div>
+</header>
+<main id="main">
+<section class="hero">
+<div class="hero-l">
+<span class="eyebrow"><span class="dot" aria-hidden="true"></span>Solana · Liquid staking &amp; MEV</span>
+<h2 class="hero-h">Bridge to Solana <span class="grad">for Jito</span></h2>
+<p class="hero-lead"><strong>Jito Bridge</strong> moves assets from Ethereum to Solana so you can stake with <strong>Jito</strong> — Solana's liquid staking (jitoSOL) and MEV infrastructure — non-custodially, with your wallet signing every step.</p>
+<div class="hero-cta">
+<a class="btn btn-primary" href="dashboard/">Open Jito Bridge App <span aria-hidden="true" class="go">↗</span></a>
+<a class="btn btn-ghost" href="#what">How it works</a>
+</div>
+<div class="trust">
+<div class="trust-badge"><span class="tb-ico" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span><div><b>Fast &amp; Low-Fee</b><span>Solana network</span></div></div>
+<div class="trust-badge"><span class="tb-ico" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><div><b>Liquid Staking</b><span>jitoSOL</span></div></div>
+<div class="trust-badge"><span class="tb-ico" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V5l-8-3Z"/><path d="M9 12l2 2 4-4"/></svg></span><div><b>Non-Custodial</b><span>You sign</span></div></div>
+<div class="trust-badge"><span class="tb-ico" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4"/></svg></span><div><b>Cross-Chain</b><span>ETH → SOL</span></div></div>
+</div>
+</div>
+<div class="hero-r">
+<div class="swap-wrap">
+<section aria-labelledby="preview-title" class="swap-card">
+<div class="card-head">
+<p class="card-title" id="preview-title">Bridge</p>
+<span class="preview-tag"><span aria-hidden="true"></span>Preview</span>
+</div>
+<div class="leg" id="leg-from">
+<div class="leg-top"><span class="leg-cap">From · Ethereum</span><span class="leg-bal">Balance: —</span></div>
+<div class="leg-body">
+<span class="amount dim">0.0</span>
+<span class="asset" role="button" tabindex="0" aria-label="ETH on Ethereum"><span class="tok"><img alt="ETH token" decoding="async" height="28" loading="lazy" src="eth.png" width="28"/></span>ETH<svg aria-hidden="true" class="chev-sm" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span>
+</div>
+</div>
+<button aria-label="Swap direction" class="swap-arrow" id="route-swap" title="Swap direction" type="button">
+<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M8 4v13M8 4L4 8M8 4l4 4M16 20V7M16 20l-4-4M16 20l4-4"></path></svg>
+</button>
+<div class="leg" id="leg-to">
+<div class="leg-top"><span class="leg-cap">To · Solana</span><span class="leg-bal">Balance: —</span></div>
+<div class="leg-body">
+<span class="amount dim">0.0</span>
+<span class="asset" role="button" tabindex="0" aria-label="SOL on Solana"><span class="tok"><img alt="SOL token" decoding="async" height="28" loading="lazy" src="sol.png" width="28"/></span>SOL<svg aria-hidden="true" class="chev-sm" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></span>
+</div>
+</div>
+<div class="route-panel">
+<div class="route-info"><b id="route-name">Ethereum → Solana</b><span>Bridge, then stake with Jito</span></div>
+<div class="route-tok"><span class="tok"><img alt="SOL token" decoding="async" height="22" loading="lazy" src="sol.png" width="22"/></span> SOL</div>
+</div>
+<div class="route-row"><span>Type</span><b>Bridge transfer</b></div>
+<div class="route-row"><span>Custody</span><b>Non-custodial</b></div>
+<a class="swap-cta" href="dashboard/">Open Jito Bridge App<span aria-hidden="true" class="cta-go">↗</span></a>
+<p class="swap-foot">Preview only · live routing &amp; settlement happen in the app</p>
+</section>
+</div>
+</div>
+</section>
+<div class="content">
+<div class="section-intro reveal">
+<p><strong>Jito Bridge</strong> moves assets from another chain — most often Ethereum — to <a href="https://solana.com/" rel="noopener noreferrer nofollow" target="_blank">Solana</a>, so you can use <a href="https://www.jito.network/" rel="noopener noreferrer nofollow" target="_blank">Jito</a>: its liquid staking token jitoSOL and its MEV infrastructure. Jito lives on Solana, so you bridge to Solana first, then swap to SOL and stake. Solana fees are paid in SOL, and bridging is non-custodial: your wallet signs each step.</p>
+</div>
+<div class="docs">
+<nav aria-label="On this page" class="toc">
+<p class="toc-h">On this page</p>
+<a href="#what">What is Jito Bridge?</a>
+<a href="#how">How bridging to Solana works</a>
+<a href="#solana">Solana network &amp; gas</a>
+<a href="#jito">Using Jito on Solana</a>
+<a href="#fees">Fees, gas &amp; time</a>
+<a href="#safety">Is bridging safe?</a>
+<a href="#troubleshoot">Bridge problems &amp; fixes</a>
+<a href="#faq">Jito Bridge FAQ</a>
+<a href="#notes">Notes before you bridge</a>
+</nav>
+<div class="doc-main">
+<details class="sec reveal" id="what" open="">
+<summary><h2>What is Jito Bridge?</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body"><p><strong>Jito Bridge</strong> here means bridging assets from another chain, usually Ethereum, to Solana so you can use <strong>Jito</strong>. Jito is a Solana protocol — liquid staking that issues jitoSOL, plus MEV infrastructure for the network — so it is not something you reach directly from Ethereum. You bridge to Solana first, then stake or interact with Jito there.</p><p>Bridging changes the chain your assets sit on; it is distinct from swapping, which changes the asset. This is an independent dashboard; live routing, approvals and settlement happen in the external app.</p></div>
+</details>
+<details class="sec reveal" id="how" open="">
+<summary><h2>How bridging to Solana works</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body"><p>Connect a wallet, choose Ethereum as the source and Solana as the destination, pick an asset and amount, and sign. Spending an <a href="https://ethereum.org/en/developers/docs/standards/tokens/erc-20/" rel="noopener noreferrer nofollow" target="_blank">ERC-20</a> on the source chain may require a one-time approval. The bridge locks or burns the asset on the source chain and releases a Solana representation.</p><p>The source transaction confirms first; the destination delivery is a separate stage you can track with the transaction hash. Once funds arrive, swap to SOL as needed and stake with Jito to receive jitoSOL. You need a little SOL for Solana fees.</p></div>
+</details>
+<details class="sec reveal" id="solana" open="">
+<summary><h2>Solana network &amp; gas</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body"><p><strong>Solana</strong> is a high-throughput, low-fee layer-1 with its own account model, separate from Ethereum's EVM. Transactions pay fees in <strong>SOL</strong>, and you use a Solana wallet such as <a href="https://phantom.app/" rel="noopener noreferrer nofollow" target="_blank">Phantom</a> rather than an EVM-only wallet.</p><p>Because Solana is not EVM-compatible, a bridged asset arrives as a Solana token, and you interact with it through Solana apps. Keep a small SOL balance for fees before you try to stake or swap.</p></div>
+</details>
+<details class="sec reveal" id="jito" open="">
+<summary><h2>Using Jito on Solana</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body"><p><strong>Jito</strong> offers <a href="https://en.wikipedia.org/wiki/Liquid_staking" rel="noopener noreferrer nofollow" target="_blank">liquid staking</a> on Solana: you stake SOL and receive <strong>jitoSOL</strong>, a token that represents your staked position plus staking and MEV rewards and stays usable across Solana DeFi. Jito also runs MEV infrastructure used by Solana validators.</p><p>After bridging, swap to SOL if needed, then stake through Jito to mint jitoSOL. Liquid staking carries smart-contract and market risk, and jitoSOL's value tracks the underlying stake rather than being pegged 1:1 to SOL.</p></div>
+</details>
+<details class="sec reveal" id="fees" open="">
+<summary><h2>Fees, gas &amp; time</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body"><p>A bridge transfer's cost is source-chain gas, any bridge fee, and Solana network fees paid in <strong>SOL</strong>. Ethereum gas can dominate the cost when the network is busy, while Solana fees themselves are small.</p><p>Keep a small SOL balance to transact and stake after bridging. Review the quoted fees and estimated delivery time before signing; delivery ranges from under a minute to longer during congestion.</p></div>
+</details>
+<details class="sec reveal" id="safety" open="">
+<summary><h2>Is bridging safe?</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body">
+<p>Bridging and staking add extra moving parts on top of normal token risk. Read the notices below before you transfer.</p>
+<details class="notice" open="">
+<summary><span class="n-ico" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></span><span class="n-title">Bridge, relayer &amp; staking risk</span><span class="chev-w" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="n-body">Bridges have historically been a target for exploits, and a bridge adds smart-contract and relayer risk. Liquid staking and DeFi carry their own smart-contract and market risks. Transfers can be delayed or stuck under congestion. Use well-known bridges and avoid front ends you cannot verify. <a href="https://consumer.ftc.gov/articles/how-recognize-avoid-phishing-scams" rel="noopener noreferrer nofollow" target="_blank">Phishing</a> is a real risk.</div>
+</details>
+<details class="notice">
+<summary><span class="n-ico" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9 12l2 2 4-4M12 2 4 5v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V5l-8-3Z"/></svg></span><span class="n-title">Verify before you sign</span><span class="chev-w" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="n-body">Verify the bridge, the source and destination chains, the token on the Solana side, and your destination Solana address before approving. Confirm you are using the official Jito app before staking. Send a small test amount first when using a route for the first time.</div>
+</details>
+</div>
+</details>
+<details class="sec reveal" id="troubleshoot" open="">
+<summary><h2>Bridge problems &amp; fixes</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body"><p>Bridging-to-Solana issues usually trace to a network or address mismatch, a missing approval, no SOL for fees, or a pending destination leg.</p><ul><li><strong>Wrong network or address:</strong> confirm Solana as the destination and use a valid Solana address, not an EVM one.</li><li><strong>No SOL for fees:</strong> you need a small SOL balance to move, swap or stake on Solana.</li><li><strong>Missing approval:</strong> wait for the source-chain approval to confirm before the transfer.</li><li><strong>Pending delivery:</strong> a confirmed source transaction and a pending destination delivery are separate stages — track the hash.</li><li><strong>Stuck transfer:</strong> keep the source transaction hash and check the bridge's status tool before retrying.</li></ul></div>
+</details>
+<details class="sec reveal" id="faq" open="">
+<summary><h2>Jito Bridge FAQ</h2><span class="chev" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary>
+<div class="sec-body">
+<details class="qa"><summary>What is Jito Bridge?<span class="chev-q" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary><div class="a"><p>Jito Bridge here means bridging assets from another chain, usually Ethereum, to Solana so you can use Jito — Solana's liquid staking (jitoSOL) and MEV infrastructure. You bridge to Solana first, then stake or use it there.</p></div></details>
+<details class="qa"><summary>How do I bridge to Solana to use Jito?<span class="chev-q" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary><div class="a"><p>Connect a wallet, choose Ethereum as source and Solana as destination, pick an asset and amount, approve if required, and sign. The bridge releases a Solana representation, which you can swap to SOL and stake with Jito for jitoSOL.</p></div></details>
+<details class="qa"><summary>What is jitoSOL?<span class="chev-q" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary><div class="a"><p>jitoSOL is Jito's liquid staking token on Solana. Staking SOL through Jito gives you jitoSOL, which represents your staked position plus staking and MEV rewards and can be used across Solana DeFi while it keeps earning.</p></div></details>
+<details class="qa"><summary>What does bridging to Solana cost?<span class="chev-q" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary><div class="a"><p>Source-chain gas, any bridge fee, and Solana network fees paid in SOL. Solana fees are low, but you need a small SOL balance to transact and stake after bridging.</p></div></details>
+<details class="qa"><summary>Is bridging to Solana for Jito safe?<span class="chev-q" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary><div class="a"><p>Bridges add smart-contract and relayer risk, and staking carries its own smart-contract and market risk. Use well-known bridges, verify the destination address and token, and test with a small amount first. Not financial advice.</p></div></details>
+<details class="qa"><summary>Do I need SOL to stake with Jito?<span class="chev-q" aria-hidden="true"><svg fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></summary><div class="a"><p>Yes. Solana transactions and staking are paid in SOL, so after bridging you need a small SOL balance to move assets, stake and receive jitoSOL.</p></div></details>
+</div>
+</details>
+<section class="field-notes reveal" id="notes">
+<h2>Notes before you bridge to Solana</h2>
+<div class="fn-body"><strong>Keep a little SOL for fees.</strong> You cannot swap or stake on Solana without SOL for network fees, so plan for it. <strong>Before you sign:</strong><ul><li>Confirm Ethereum as source and Solana as destination, and use a valid Solana address.</li><li>Verify the token on the Solana side and keep the source transaction hash.</li><li>Use the official Jito app to stake, and test a new route with a small amount first.</li></ul>Independent reference — not affiliated with Jito, Solana or any bridge. Not financial advice.</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+<footer class="site-foot"><div class="wrap">Jito Bridge — independent guide &amp; technical reference. Not affiliated with or endorsed by Jito, Solana or any bridge. Not financial advice. · <a href="dashboard/">Open Jito Bridge App ↗</a> · © 2026</div></footer>
+<script>
+(function(){
+  "use strict";
+  document.documentElement.classList.add("js");
+  var $=function(id){return document.getElementById(id);};
+  var SIGNALS=[{"t":"price","id":"sig-jto","cg":"jito-governance-token","chg":true},{"t":"price","id":"sig-sol","cg":"solana","chg":true}];
+  (function(){var S=SIGNALS;if(!S||!S.length)return;function el(id){return document.getElementById(id);}function hide(id){var e=el(id);if(e){var t=e.closest(".tick");if(t)t.style.display="none";}}function set(id,x){var e=el(id);if(e)e.textContent=x;}function usd(n){n=Number(n);return "$"+n.toLocaleString("en-US",{maximumFractionDigits:n<1?4:2});}function jf(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.json();});}var ids=S.map(function(s){return s.cg;}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(",");jf("https://api.coingecko.com/api/v3/simple/price?ids="+ids+"&vs_currencies=usd&include_24hr_change=true").then(function(v){S.forEach(function(s){var d=v[s.cg];if(!d){hide(s.id);return;}if(isFinite(d.usd)){var x=usd(d.usd);if(s.chg&&isFinite(d.usd_24h_change)){var c=d.usd_24h_change;x+=" "+(c>=0?"▲":"▼")+Math.abs(c).toFixed(1)+"%";}set(s.id,x);}else hide(s.id);});}).catch(function(){S.forEach(function(s){hide(s.id);});});})();
+  var swap=$("route-swap");
+  if(swap)swap.addEventListener("click",function(){var from=$("leg-from"),to=$("leg-to");if(from&&to){var fa=from.querySelector(".asset"),ta=to.querySelector(".asset");var tmp=fa.innerHTML;fa.innerHTML=ta.innerHTML;ta.innerHTML=tmp;}var name=$("route-name");if(name)name.textContent=(name.textContent==="Ethereum → Solana")?"Solana → Ethereum":"Ethereum → Solana";});
+  Array.prototype.forEach.call(document.querySelectorAll("details"),function(d){var s=d.querySelector("summary");if(!s)return;s.setAttribute("aria-expanded",d.open?"true":"false");d.addEventListener("toggle",function(){s.setAttribute("aria-expanded",d.open?"true":"false");});});
+  Array.prototype.forEach.call(document.querySelectorAll('.asset[role="button"]'),function(b){b.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();if(swap)swap.click();}});});
+  var reveals=document.querySelectorAll(".reveal");var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reveals.length&&"IntersectionObserver" in window&&!reduce){var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{rootMargin:"0px 0px -8% 0px",threshold:0.08});reveals.forEach(function(el){io.observe(el);});}else{reveals.forEach(function(el){el.classList.add("in");});}
+  function openHash(){var id=location.hash.slice(1);if(!id)return;var el=document.getElementById(id);if(el&&el.tagName==="DETAILS"){el.open=true;el.classList.add("in");}}
+  window.addEventListener("hashchange",openHash);openHash();
+  document.addEventListener("click",function(e){var a=e.target.closest('a[href^="#"]');if(!a)return;var el=document.getElementById(a.getAttribute("href").slice(1));if(el&&el.tagName==="DETAILS"){el.open=true;el.classList.add("in");}});
+})();
+(function(){var links=[].slice.call(document.querySelectorAll(".toc a"));if(!links.length)return;var secs=[].slice.call(document.querySelectorAll(".doc-main [id]")).filter(function(s){return document.querySelector('.toc a[href="#'+s.id+'"]');});if(!secs.length)return;function setA(id){links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+id);});}function up(){var cur=secs[0];for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top-120<=0)cur=secs[i];else break;}if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1];if(cur)setA(cur.id);}window.addEventListener("scroll",up,{passive:true});window.addEventListener("resize",up);up();})();
+</script>
+</body>
+</html>

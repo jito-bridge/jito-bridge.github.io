@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jito-bridge.github.io/sitemap.xml
